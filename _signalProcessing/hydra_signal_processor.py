@@ -64,6 +64,7 @@ class SignalProcessor(QtCore.QThread):
     signal_spectrum_ready = QtCore.pyqtSignal()
     signal_sync_ready = QtCore.pyqtSignal()
     signal_DOA_ready = QtCore.pyqtSignal()
+    signal_BF_ready = QtCore.pyqtSignal()
     signal_overdrive = QtCore.pyqtSignal(int)
     signal_period    = QtCore.pyqtSignal(float)
     signal_PR_ready = QtCore.pyqtSignal()
@@ -89,6 +90,7 @@ class SignalProcessor(QtCore.QThread):
         self.en_calib_iq = False
         self.en_calib_DOA_90 = False
         self.en_DOA_estimation = False
+        self.en_BF_estimation = True
         self.en_PR_processing = False
         self.en_PR_autodet = False
         
@@ -128,7 +130,7 @@ class SignalProcessor(QtCore.QThread):
         self.DOA_sample_size = 2**15 # Connect to GUI value??
         self.xcorr_sample_size = 2**18 #2**18
         self.spectrum = np.ones((self.channel_number+1,self.spectrum_sample_size), dtype=np.float32)
-        self.xcorr = np.ones((self.channel_number-1,self.xcorr_sample_size*2), dtype=np.complex64)        
+        self.xcorr = np.ones((self.channel_number-1, self.xcorr_sample_size*2), dtype=np.complex64)
         self.phasor_win = 2**10 # Phasor plot window
         self.phasors = np.ones((self.channel_number-1, self.phasor_win), dtype=np.complex64)
         self.run_processing = False
@@ -149,6 +151,17 @@ class SignalProcessor(QtCore.QThread):
         self.noise_checked = False
         self.resync_time = -1
 
+        # Beamforming
+        self.w = np.array([1] * 4, dtype=np.complex)
+
+        self.w = np.array([0.03-0.34j, -0.25-0.05j, -0.21-0.14j, -0.21+0.26j]) # Max at 30 deg
+
+        self.d_lambda = 0.35
+        self.phi_deg = []
+        self.g_dbi = []
+        self.g0_dbi = 0
+        self.g_dbi_min = -30 # Min level for antenna pattern plot
+
     def run(self):
         # xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
         #    
@@ -166,7 +179,7 @@ class SignalProcessor(QtCore.QThread):
 
             self.DOA_sample_size = self.module_receiver.iq_samples[0,:].size
             self.xcorr_sample_size = self.module_receiver.iq_samples[0,:].size
-            self.xcorr = np.ones((self.channel_number-1,self.xcorr_sample_size*2), dtype=np.complex64) 
+            self.xcorr = np.ones((self.channel_number-1, self.xcorr_sample_size*2), dtype=np.complex64)
             
             # Check overdrive
             if self.module_receiver.overdrive_detect_flag:
@@ -226,7 +239,15 @@ class SignalProcessor(QtCore.QThread):
 
                 self.estimate_DOA()
                 self.signal_DOA_ready.emit()
-            
+
+            # Beamforming estimation
+            if self.en_BF_estimation:
+                # Get FFT for squelch
+                # self.spectrum[1,:] = 10*np.log10(np.fft.fftshift(np.abs(np.fft.fft(self.module_receiver.iq_samples[0, 0:self.spectrum_sample_size]))))
+
+                self.estimate_BF()
+                self.signal_BF_ready.emit()
+
             # Passive Radar processing
             if self.en_PR_processing:
 #                self.module_receiver.channel_number = 2
@@ -241,7 +262,7 @@ class SignalProcessor(QtCore.QThread):
                 np.save('hydra_samples.npy', self.module_receiver.iq_samples)
 
 
-# Code to maintain sync
+            # Code to maintain sync
             '''if self.timed_sync and not self.en_sync:
                 if not self.noise_checked:
                     self.module_receiver.switch_noise_source(0)
@@ -354,6 +375,40 @@ class SignalProcessor(QtCore.QThread):
 
         #print(self.DOA_MUSIC_res)
 
+
+    def gain_array(self, phi, w, d_lambda):
+        """
+        @brief Calculates gain factor of linear antenna array
+        """
+        psi = 2 * np.pi * d_lambda * np.sin(phi)
+        a = 0
+        for i in range(len(w)):
+            a += w[i] * np.exp(1j * i * psi)
+        g = np.abs(a) / len(w)
+
+        return g
+
+    def estimate_BF(self):
+        i = 0
+        # TBD
+        iq_samples = self.module_receiver.iq_samples[:, 0:self.DOA_sample_size]
+
+        phi = np.linspace(-np.pi/2, np.pi/2, 200)
+        g_array = self.gain_array(phi, self.w, self.d_lambda) ** 2
+        g_dbi = 10 * np.log10(g_array)
+
+        self.phi_deg = np.rad2deg(phi)
+        self.g_dbi = np.clip(g_dbi, self.g_dbi_min, None)
+
+        #s = 0
+        #for i in range(4):
+        #    iq_samples[i, :]
+
+        w_m = self.w.reshape(1, 4)
+        s = np.sum(w_m.T * iq_samples, axis=0)/4
+        # s /= np.abs(s)
+        gain0 = np.average(np.real(s * np.conjugate(s)))
+        self.g0_dbi = 10 * np.log10(gain0)
 
     def PR_processing(self):
         #print("[ INFO ] Python DSP: Start Passive Radar processing")
