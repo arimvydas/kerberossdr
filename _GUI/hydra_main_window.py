@@ -245,6 +245,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.pushButton_del_sync_history.clicked.connect(self.pb_del_sync_history_clicked)
         self.pushButton_DOA_cal_90.clicked.connect(self.pb_calibrate_DOA_90_clicked)
         self.pushButton_set_receiver_config.clicked.connect(self.pb_rec_reconfig_clicked)
+        self.checkBox_bf_w_invert.stateChanged.connect(self.set_bf_invert_angles)
         self.pushButton_bf_calc.clicked.connect(self.pb_bf_calc_clicked)
         self.stream_state = False
 
@@ -269,11 +270,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.checkBox_en_peakhold.stateChanged.connect(self.set_PR_params)
 
         self.pushButton_bf_gains_p90.clicked.connect(self.set_bf_gains_p90)
+        self.pushButton_bf_gains_p75.clicked.connect(self.set_bf_gains_p75)
         self.pushButton_bf_gains_p60.clicked.connect(self.set_bf_gains_p60)
+        self.pushButton_bf_gains_p45.clicked.connect(self.set_bf_gains_p45)
         self.pushButton_bf_gains_p30.clicked.connect(self.set_bf_gains_p30)
+        self.pushButton_bf_gains_p15.clicked.connect(self.set_bf_gains_p15)
         self.pushButton_bf_gains_0.clicked.connect(self.set_bf_gains_0)
+        self.pushButton_bf_gains_m15.clicked.connect(self.set_bf_gains_m15)
         self.pushButton_bf_gains_m30.clicked.connect(self.set_bf_gains_m30)
+        self.pushButton_bf_gains_m45.clicked.connect(self.set_bf_gains_m45)
         self.pushButton_bf_gains_m60.clicked.connect(self.set_bf_gains_m60)
+        self.pushButton_bf_gains_m75.clicked.connect(self.set_bf_gains_m75)
         self.pushButton_bf_gains_m90.clicked.connect(self.set_bf_gains_m90)
         self.pushButton_bf_gains_clear.clicked.connect(self.set_bf_gains_clear)
 
@@ -805,6 +812,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.DOA_time = currentTime
             self.export_DOA.export('/ram/doa.jpg')
 
+
+    def set_bf_invert_angles(self):
+        if self.checkBox_bf_w_invert.checkState():
+            self.module_signal_processor.bf_invert_angles = True
+        else:
+            self.module_signal_processor.bf_invert_angles = False
+
+        self.module_signal_processor.en_BF_estimation = True
+
+
     def pb_bf_calc_clicked(self):
         w1 = complex(self.lineEdit_bf_w1.text())
         w2 = complex(self.lineEdit_bf_w2.text())
@@ -812,114 +829,170 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         w4 = complex(self.lineEdit_bf_w4.text())
 
         self.module_signal_processor.w = np.array([w1, w2, w3, w4], dtype=np.complex)
-        self.module_signal_processor.signal_BF_ready.emit()
+
+        self.module_signal_processor.en_BF_estimation = True
+
 
     def BF_plot(self):
 
         self.plotWidget_BF.clear()
-
         self.plotWidget_BF.addLegend()
-
-        # self.module_receiver.download_iq_samples()
-
-        if 0:
-            N = 200
-            self.plotWidget_BF.plot(np.arange(N), np.rad2deg(np.angle(self.module_signal_processor.iq_samples[0, :N])),
-                                    pen=pg.mkPen((255, 199, 15), width=2), name="Ch1")
-            self.plotWidget_BF.plot(np.arange(N), np.rad2deg(np.angle(self.module_signal_processor.iq_samples[1, :N])),
-                                    pen=pg.mkPen('g', width=2), name="Ch2")
-            self.plotWidget_BF.plot(np.arange(N), np.rad2deg(np.angle(self.module_signal_processor.iq_samples[2, :N])),
-                                    pen=pg.mkPen('r', width=2), name="Ch3")
-            self.plotWidget_BF.plot(np.arange(N), np.rad2deg(np.angle(self.module_signal_processor.iq_samples[3, :N])),
-                                    pen=pg.mkPen((9, 237, 237), width=2), name="Ch4")
 
         #
         # Plot theoretical beamforming antenna pattern
         #
         if (len(self.module_signal_processor.phi_deg) > 0 and
-                len(self.module_signal_processor.g_dbi) > 0):
+            len(self.module_signal_processor.g_dbi) > 0):
             self.plotWidget_BF.setLabel("bottom", "Angle (deg)")
             self.plotWidget_BF.setLabel("left", "Gain (dBi)")
 
             self.plotWidget_BF.plot(self.module_signal_processor.phi_deg, self.module_signal_processor.g_dbi,
                                     pen=pg.mkPen((255, 199, 15), width=2), name="Theoretical")
 
+            self.plotWidget_BF.setTitle(f'd_lambda: {self.module_signal_processor.DOA_inter_elem_space:.2f}')
+
         #
         # Plot measured beamforming antenna pattern
         #
         if self.meas_phi_deg.size > 0 and self.meas_g_dbi.size > 0:
-            self.meas_g_dbi -= np.max(self.meas_g_dbi)
-            self.plotWidget_BF.plot(self.meas_phi_deg, self.meas_g_dbi, pen=None, symbol='o', name="Measured")
+            g_dbi_diff = self.meas_g_dbi - np.max(self.meas_g_dbi)
+            self.plotWidget_BF.plot(self.meas_phi_deg,
+                                    g_dbi_diff,
+                                    pen=None, symbol='o', symbolPen='r', symbolBrush=1.0, name="Measured")
 
             # Set min level for theoretical pattern plot
-            if np.min(self.meas_g_dbi) < self.module_signal_processor.g_dbi_min:
-                self.module_signal_processor.g_dbi_min = np.min(self.meas_g_dbi)
+            if np.min(g_dbi_diff) < self.module_signal_processor.g_dbi_min:
+                self.module_signal_processor.g_dbi_min = np.min(g_dbi_diff)
         else:
             # Revert to default min level for theoretical pattern plot
             self.module_signal_processor.g_dbi_min = -30
+
 
     def set_bf_gains_p90(self):
         g_dbi = self.module_signal_processor.g0_dbi
         self.meas_phi_deg = np.append(self.meas_phi_deg, 90)
         self.meas_g_dbi = np.append(self.meas_g_dbi, g_dbi)
         self.pushButton_bf_gains_p90.setText(f'{g_dbi:.2f} dBi')
-        self.BF_plot()
+
+        #self.BF_plot()
+        self.module_signal_processor.en_BF_estimation = True
+
+    def set_bf_gains_p75(self):
+        g_dbi = self.module_signal_processor.g0_dbi
+        self.meas_phi_deg = np.append(self.meas_phi_deg, 75)
+        self.meas_g_dbi = np.append(self.meas_g_dbi, g_dbi)
+        self.pushButton_bf_gains_p75.setText(f'{g_dbi:.2f} dBi')
+        #self.BF_plot()
+        self.module_signal_processor.en_BF_estimation = True
 
     def set_bf_gains_p60(self):
         g_dbi = self.module_signal_processor.g0_dbi
         self.meas_phi_deg = np.append(self.meas_phi_deg, 60)
         self.meas_g_dbi = np.append(self.meas_g_dbi, g_dbi)
         self.pushButton_bf_gains_p60.setText(f'{g_dbi:.2f} dBi')
-        self.BF_plot()
+        #self.BF_plot()
+        self.module_signal_processor.en_BF_estimation = True
+
+    def set_bf_gains_p45(self):
+        g_dbi = self.module_signal_processor.g0_dbi
+        self.meas_phi_deg = np.append(self.meas_phi_deg, 45)
+        self.meas_g_dbi = np.append(self.meas_g_dbi, g_dbi)
+        self.pushButton_bf_gains_p45.setText(f'{g_dbi:.2f} dBi')
+        #self.BF_plot()
+        self.module_signal_processor.en_BF_estimation = True
 
     def set_bf_gains_p30(self):
         g_dbi = self.module_signal_processor.g0_dbi
         self.meas_phi_deg = np.append(self.meas_phi_deg, 30)
         self.meas_g_dbi = np.append(self.meas_g_dbi, g_dbi)
         self.pushButton_bf_gains_p30.setText(f'{g_dbi:.2f} dBi')
-        self.BF_plot()
+        #self.BF_plot()
+        self.module_signal_processor.en_BF_estimation = True
+
+    def set_bf_gains_p15(self):
+        g_dbi = self.module_signal_processor.g0_dbi
+        self.meas_phi_deg = np.append(self.meas_phi_deg, 15)
+        self.meas_g_dbi = np.append(self.meas_g_dbi, g_dbi)
+        self.pushButton_bf_gains_p15.setText(f'{g_dbi:.2f} dBi')
+        #self.BF_plot()
+        self.module_signal_processor.en_BF_estimation = True
 
     def set_bf_gains_0(self):
         g_dbi = self.module_signal_processor.g0_dbi
         self.meas_phi_deg = np.append(self.meas_phi_deg, 0)
         self.meas_g_dbi = np.append(self.meas_g_dbi, g_dbi)
         self.pushButton_bf_gains_0.setText(f'{g_dbi:.2f} dBi')
-        self.BF_plot()
+        #self.BF_plot()
+        self.module_signal_processor.en_BF_estimation = True
+
+    def set_bf_gains_m15(self):
+        g_dbi = self.module_signal_processor.g0_dbi
+        self.meas_phi_deg = np.append(self.meas_phi_deg, -15)
+        self.meas_g_dbi = np.append(self.meas_g_dbi, g_dbi)
+        self.pushButton_bf_gains_m15.setText(f'{g_dbi:.2f} dBi')
+        #self.BF_plot()
+        self.module_signal_processor.en_BF_estimation = True
 
     def set_bf_gains_m30(self):
         g_dbi = self.module_signal_processor.g0_dbi
         self.meas_phi_deg = np.append(self.meas_phi_deg, -30)
         self.meas_g_dbi = np.append(self.meas_g_dbi, g_dbi)
         self.pushButton_bf_gains_m30.setText(f'{g_dbi:.2f} dBi')
-        self.BF_plot()
+        #self.BF_plot()
+        self.module_signal_processor.en_BF_estimation = True
+
+    def set_bf_gains_m45(self):
+        g_dbi = self.module_signal_processor.g0_dbi
+        self.meas_phi_deg = np.append(self.meas_phi_deg, -45)
+        self.meas_g_dbi = np.append(self.meas_g_dbi, g_dbi)
+        self.pushButton_bf_gains_m45.setText(f'{g_dbi:.2f} dBi')
+        #self.BF_plot()
+        self.module_signal_processor.en_BF_estimation = True
 
     def set_bf_gains_m60(self):
         g_dbi = self.module_signal_processor.g0_dbi
         self.meas_phi_deg = np.append(self.meas_phi_deg, -60)
         self.meas_g_dbi = np.append(self.meas_g_dbi, g_dbi)
         self.pushButton_bf_gains_m60.setText(f'{g_dbi:.2f} dBi')
-        self.BF_plot()
+        #self.BF_plot()
+        self.module_signal_processor.en_BF_estimation = True
+
+    def set_bf_gains_m75(self):
+        g_dbi = self.module_signal_processor.g0_dbi
+        self.meas_phi_deg = np.append(self.meas_phi_deg, -75)
+        self.meas_g_dbi = np.append(self.meas_g_dbi, g_dbi)
+        self.pushButton_bf_gains_m75.setText(f'{g_dbi:.2f} dBi')
+        #self.BF_plot()
+        self.module_signal_processor.en_BF_estimation = True
 
     def set_bf_gains_m90(self):
         g_dbi = self.module_signal_processor.g0_dbi
         self.meas_phi_deg = np.append(self.meas_phi_deg, -90)
         self.meas_g_dbi = np.append(self.meas_g_dbi, g_dbi)
         self.pushButton_bf_gains_m90.setText(f'{g_dbi:.2f} dBi')
-        self.BF_plot()
+        #self.BF_plot()
+        self.module_signal_processor.en_BF_estimation = True
 
     def set_bf_gains_clear(self):
 
         self.pushButton_bf_gains_p90.setText('')
+        self.pushButton_bf_gains_p75.setText('')
         self.pushButton_bf_gains_p60.setText('')
+        self.pushButton_bf_gains_p45.setText('')
         self.pushButton_bf_gains_p30.setText('')
+        self.pushButton_bf_gains_p15.setText('')
         self.pushButton_bf_gains_0.setText('')
+        self.pushButton_bf_gains_m15.setText('')
         self.pushButton_bf_gains_m30.setText('')
+        self.pushButton_bf_gains_m45.setText('')
         self.pushButton_bf_gains_m60.setText('')
+        self.pushButton_bf_gains_m75.setText('')
         self.pushButton_bf_gains_m90.setText('')
 
         self.meas_phi_deg = np.array([])
         self.meas_g_dbi = np.array([])
-        self.BF_plot()
+        #self.BF_plot()
+        self.module_signal_processor.en_BF_estimation = True
 
     def RD_plot(self):
         """
