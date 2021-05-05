@@ -156,7 +156,8 @@ class SignalProcessor(QtCore.QThread):
 
         self.w = np.array([0.03-0.34j, -0.25-0.05j, -0.21-0.14j, -0.21+0.26j]) # Max at 30 deg
 
-        self.d_lambda = 0.35
+        self.bf_invert_angles = False
+
         self.phi_deg = []
         self.g_dbi = []
         self.g0_dbi = 0
@@ -389,26 +390,30 @@ class SignalProcessor(QtCore.QThread):
         return g
 
     def estimate_BF(self):
-        i = 0
-        # TBD
+        """
+        @brief Calculate theoretical antenna array pattern
+        """
+
         iq_samples = self.module_receiver.iq_samples[:, 0:self.DOA_sample_size]
 
         phi = np.linspace(-np.pi/2, np.pi/2, 200)
-        g_array = self.gain_array(phi, self.w, self.d_lambda) ** 2
+        g_array = self.gain_array(phi, self.w, self.DOA_inter_elem_space) ** 2
+        g_array /= np.max(g_array)  # Normalize to unity
         g_dbi = 10 * np.log10(g_array)
 
         self.phi_deg = np.rad2deg(phi)
         self.g_dbi = np.clip(g_dbi, self.g_dbi_min, None)
 
-        #s = 0
-        #for i in range(4):
-        #    iq_samples[i, :]
+        if self.bf_invert_angles:
+            self.g_dbi = self.g_dbi[::-1]
 
         w_m = self.w.reshape(1, 4)
         s = np.sum(w_m.T * iq_samples, axis=0)/4
-        # s /= np.abs(s)
-        gain0 = np.average(np.real(s * np.conjugate(s)))
+        gain0 = np.mean(np.real(s * np.conjugate(s)))
         self.g0_dbi = 10 * np.log10(gain0)
+
+        self.en_BF_estimation = False
+
 
     def PR_processing(self):
         #print("[ INFO ] Python DSP: Start Passive Radar processing")
