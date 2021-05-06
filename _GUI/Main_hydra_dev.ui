@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1366</width>
-    <height>870</height>
+    <height>1067</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,7 +26,7 @@
          </size>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>3</number>
         </property>
         <widget class="QWidget" name="page_4">
          <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -44,13 +44,13 @@
                   <number>4</number>
                  </property>
                  <property name="minimum">
-                  <double>25.0000</double>
+                  <double>25.000000000000000</double>
                  </property>
                  <property name="maximum">
-                  <double>2000.0000</double>
+                  <double>2000.000000000000000</double>
                  </property>
                  <property name="value">
-                  <double>100.0000</double>
+                  <double>100.000000000000000</double>
                  </property>
                 </widget>
                </item>
@@ -71,10 +71,10 @@
                <item row="1" column="1">
                 <widget class="QDoubleSpinBox" name="label_gain_3">
                  <property name="minimum">
-                  <double>1.0000</double>
+                  <double>1.000000000000000</double>
                  </property>
                  <property name="maximum">
-                  <double>3.2000</double>
+                  <double>3.200000000000000</double>
                  </property>
                 </widget>
                </item>
@@ -292,10 +292,10 @@
                <item row="1" column="1">
                 <widget class="QDoubleSpinBox" name="doubleSpinBox_filterbw">
                  <property name="maximum">
-                  <double>3400.0000</double>
+                  <double>3400.000000000000000</double>
                  </property>
                  <property name="value">
-                  <double>150.0000</double>
+                  <double>150.000000000000000</double>
                  </property>
                 </widget>
                </item>
@@ -463,7 +463,7 @@
                   <number>4</number>
                  </property>
                  <property name="value">
-                  <double>0.5000</double>
+                  <double>0.500000000000000</double>
                  </property>
                 </widget>
                </item>
@@ -623,6 +623,295 @@
                 </widget>
                </item>
               </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="page_bf">
+         <layout class="QGridLayout" name="gridLayout_26">
+          <item row="0" column="0">
+           <widget class="QGroupBox" name="groupBox_bf_w">
+            <property name="title">
+             <string>Theoretical pattern</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_27">
+             <item row="0" column="0">
+              <layout class="QGridLayout" name="gridLayout_bf_w">
+               <item row="3" column="0">
+                <widget class="QLabel" name="label_bf_w4">
+                 <property name="text">
+                  <string>w4:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_bf_w2">
+                 <property name="text">
+                  <string>w2:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="label_bf_w3">
+                 <property name="text">
+                  <string>w3:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_bf_w1">
+                 <property name="text">
+                  <string>w1:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QLineEdit" name="lineEdit_bf_w1">
+                 <property name="text">
+                  <string>1+0j</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QLineEdit" name="lineEdit_bf_w2">
+                 <property name="text">
+                  <string>1+0j</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QLineEdit" name="lineEdit_bf_w3">
+                 <property name="text">
+                  <string>1+0j</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="1">
+                <widget class="QLineEdit" name="lineEdit_bf_w4">
+                 <property name="text">
+                  <string>1+0j</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="2" column="0">
+              <widget class="QPushButton" name="pushButton_bf_calc">
+               <property name="text">
+                <string>Update Pattern</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QCheckBox" name="checkBox_bf_w_invert">
+               <property name="text">
+                <string>Invert angles</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="1" column="0" rowspan="2">
+           <widget class="QGroupBox" name="groupBox_bf_gains">
+            <property name="title">
+             <string>Measured pattern </string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_22">
+             <item row="0" column="0">
+              <layout class="QGridLayout" name="gridLayout_bf_gains">
+               <item row="8" column="0" alignment="Qt::AlignRight">
+                <widget class="QLabel" name="label_bf_gains_m30">
+                 <property name="text">
+                  <string>-30 deg</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="6" column="0" alignment="Qt::AlignRight">
+                <widget class="QLabel" name="label_bf_gains_0">
+                 <property name="text">
+                  <string>0 deg</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="11" column="1">
+                <widget class="QPushButton" name="pushButton_bf_gains_m75">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="12" column="0" alignment="Qt::AlignRight">
+                <widget class="QLabel" name="label_bf_gains_m90">
+                 <property name="text">
+                  <string>-90 deg</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0" alignment="Qt::AlignRight">
+                <widget class="QLabel" name="label_bf_gains_p60">
+                 <property name="text">
+                  <string>+60 deg</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="1">
+                <widget class="QPushButton" name="pushButton_bf_gains_p45">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="9" column="1">
+                <widget class="QPushButton" name="pushButton_bf_gains_m45">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="1">
+                <widget class="QPushButton" name="pushButton_bf_gains_p30">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="1">
+                <widget class="QPushButton" name="pushButton_bf_gains_p15">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="0" alignment="Qt::AlignRight">
+                <widget class="QLabel" name="label_bf_gains_p30">
+                 <property name="text">
+                  <string>+30 deg</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0" alignment="Qt::AlignRight">
+                <widget class="QLabel" name="label_bf_gains_p90">
+                 <property name="text">
+                  <string>+90 deg</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QPushButton" name="pushButton_bf_gains_p60">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QPushButton" name="pushButton_bf_gains_p90">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="10" column="1">
+                <widget class="QPushButton" name="pushButton_bf_gains_m60">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="6" column="1">
+                <widget class="QPushButton" name="pushButton_bf_gains_0">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="8" column="1">
+                <widget class="QPushButton" name="pushButton_bf_gains_m30">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="12" column="1">
+                <widget class="QPushButton" name="pushButton_bf_gains_m90">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="10" column="0" alignment="Qt::AlignRight">
+                <widget class="QLabel" name="label_bf_gains_m60">
+                 <property name="text">
+                  <string>-60 deg</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QPushButton" name="pushButton_bf_gains_p75">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="7" column="1">
+                <widget class="QPushButton" name="pushButton_bf_gains_m15">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0" alignment="Qt::AlignRight">
+                <widget class="QLabel" name="label_bf_gains_p75">
+                 <property name="text">
+                  <string>+75 deg</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0" alignment="Qt::AlignRight">
+                <widget class="QLabel" name="label_bf_gains_p45">
+                 <property name="text">
+                  <string>+45 deg</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="0" alignment="Qt::AlignRight">
+                <widget class="QLabel" name="label_bf_gains_p15">
+                 <property name="text">
+                  <string>+15 deg</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="7" column="0" alignment="Qt::AlignRight">
+                <widget class="QLabel" name="label_bf_gains_m15">
+                 <property name="text">
+                  <string>-15 deg</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="9" column="0" alignment="Qt::AlignRight">
+                <widget class="QLabel" name="label_bf_gains_m45">
+                 <property name="text">
+                  <string>-45 deg</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="11" column="0" alignment="Qt::AlignRight">
+                <widget class="QLabel" name="label_bf_gains_m75">
+                 <property name="text">
+                  <string>-75 deg</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="1" column="0">
+              <widget class="QPushButton" name="pushButton_bf_gains_clear">
+               <property name="text">
+                <string>Clear Pattern</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -801,10 +1090,10 @@
                   <item row="0" column="1">
                    <widget class="QDoubleSpinBox" name="doubleSpinBox_cc_det_max_range">
                     <property name="maximum">
-                     <double>100000.0000</double>
+                     <double>100000.000000000000000</double>
                     </property>
                     <property name="value">
-                     <double>128.0000</double>
+                     <double>128.000000000000000</double>
                     </property>
                    </widget>
                   </item>
@@ -863,6 +1152,20 @@
          <string>Status </string>
         </property>
         <layout class="QGridLayout" name="gridLayout_15">
+         <item row="3" column="0">
+          <widget class="QPushButton" name="pushButton_proc_control">
+           <property name="text">
+            <string>Start processing</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QPushButton" name="pushButton_close">
+           <property name="text">
+            <string>Exit</string>
+           </property>
+          </widget>
+         </item>
          <item row="2" column="0">
           <layout class="QGridLayout" name="gridLayout_14">
            <item row="1" column="1">
@@ -896,7 +1199,7 @@
           </layout>
          </item>
          <item row="5" column="0">
-          <spacer name="verticalSpacer_4">
+          <spacer name="verticalSpacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
@@ -907,20 +1210,6 @@
             </size>
            </property>
           </spacer>
-         </item>
-         <item row="4" column="0">
-          <widget class="QPushButton" name="pushButton_close">
-           <property name="text">
-            <string>Exit</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QPushButton" name="pushButton_proc_control">
-           <property name="text">
-            <string>Start processing</string>
-           </property>
-          </widget>
          </item>
         </layout>
        </widget>
@@ -962,6 +1251,16 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tab_bf">
+       <attribute name="title">
+        <string>Beamforming</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_24">
+        <item row="0" column="0">
+         <layout class="QGridLayout" name="gridLayout_bf"/>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="tab">
        <attribute name="title">
         <string>Passive radar</string>
@@ -982,7 +1281,7 @@
      <x>0</x>
      <y>0</y>
      <width>1366</width>
-     <height>31</height>
+     <height>27</height>
     </rect>
    </property>
   </widget>
